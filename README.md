@@ -10,6 +10,7 @@ Repositório com os códigos desenvolvidos para estudo e revisão da prova de Co
 | `pong_prova.py` | Pong (jogador vs CPU) | Colisão AABB, física de bola, `glutKeyboardUpFunc` |
 | `breakout_prova.py` | Breakout | Colisão bola×tijolo, múltiplas vidas, cores por linha |
 | `asteroids_prova.py` | Asteroids | `glRotatef`, `glTranslatef`, `glPushMatrix`/`glPopMatrix`, wrap-around |
+| `velha_prova.py` | Jogo da Velha | `glutMouseFunc`, coordenadas mouse→grade, IA Minimax |
 
 ## Tecnologias
 
@@ -44,3 +45,5 @@ python snake_prova.py
 | Colisão AABB | `pong_prova.py`, `breakout_prova.py` |
 | Colisão circular (distância entre centros) | `asteroids_prova.py` |
 | Teclado contínuo (`glutKeyboardUpFunc`, `glutSpecialUpFunc`) | `pong_prova.py`, `breakout_prova.py`, `asteroids_prova.py` |
+| Entrada de mouse (`glutMouseFunc`, conversão pixel→jogo) | `velha_prova.py` |
+| IA com Minimax | `velha_prova.py` |

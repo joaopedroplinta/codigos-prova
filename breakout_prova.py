@@ -548,6 +548,16 @@ def teclado_especial_up(tecla, x, y):
         teclas.discard('right')
 
 
+def redimensionar(w, h):
+    glViewport(0, 0, w, h)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluOrtho2D(0, LARGURA, 0, ALTURA)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+    glutPostRedisplay()
+
+
 # --- Inicialização OpenGL ---
 
 def inicializar_opengl():
@@ -571,6 +581,7 @@ def main():
     inicializar_opengl()
 
     glutDisplayFunc(display)
+    glutReshapeFunc(redimensionar)
     glutKeyboardFunc(teclado)
     glutKeyboardUpFunc(teclado_up)
     glutSpecialFunc(teclado_especial)

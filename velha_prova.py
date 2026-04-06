@@ -1,3 +1,4 @@
+
 import os
 import sys
 import math
@@ -29,6 +30,9 @@ modo       = None       # '1P' | '2P'
 opcao_menu = 0
 vencedor   = None       # None | 'X' | 'O' | 'EMPATE'
 linha_vit  = None       # [(lin,col),(lin,col),(lin,col)] da linha vencedora
+
+janela_w = LARGURA
+janela_h = ALTURA
 
 
 # ---- Lógica do jogo ----
@@ -396,7 +400,9 @@ def mouse(botao, acao, px, py):
         return
     if modo == '1P' and vez == 'O':
         return  # bloqueia clique enquanto CPU "pensa"
-    lin, col = pixel_para_celula(px, py)
+    gx = int(px * LARGURA / janela_w)
+    gy = int(py * ALTURA  / janela_h)
+    lin, col = pixel_para_celula(gx, gy)
     if lin is not None:
         jogar(lin, col)
 
@@ -447,6 +453,18 @@ def teclado_especial(tecla, x, y):
             glutPostRedisplay()
 
 
+def redimensionar(w, h):
+    global janela_w, janela_h
+    janela_w, janela_h = w, h
+    glViewport(0, 0, w, h)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluOrtho2D(0, LARGURA, 0, ALTURA)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+    glutPostRedisplay()
+
+
 # ---- Inicialização OpenGL ----
 
 def inicializar_opengl():
@@ -468,6 +486,7 @@ def main():
     inicializar_opengl()
 
     glutDisplayFunc(display)
+    glutReshapeFunc(redimensionar)
     glutKeyboardFunc(teclado)
     glutSpecialFunc(teclado_especial)
     glutMouseFunc(mouse)        # entrada de mouse

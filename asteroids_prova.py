@@ -1,13 +1,3 @@
-"""
-Asteroids — Computação Gráfica
-Conceitos cobertos:
-  - glPushMatrix / glPopMatrix
-  - glTranslatef / glRotatef  (rotação da nave e dos asteroides)
-  - Wrap-around de coordenadas
-  - Desenho com GL_LINE_LOOP e GL_LINES
-  - Detecção de colisão por distância (círculos)
-  - glutTimerFunc para animação
-"""
 import os
 import sys
 import math

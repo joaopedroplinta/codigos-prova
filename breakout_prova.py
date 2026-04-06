@@ -279,14 +279,21 @@ def verificar_colisao_tijolo():
             tijolo[2] = False
             pontuacao += 10
 
-            # Determina de qual lado veio para refletir corretamente
-            overlap_x = BOLA_R - abs(bx - px) if px != bx else 0
-            overlap_y = BOLA_R - abs(by - py) if py != by else 0
-
-            if overlap_x < overlap_y or py == by:
-                bola['vx'] = -bola['vx']
-            else:
+            # px == bx → centro da bola dentro da faixa X do tijolo → bateu no topo/base
+            # py == by → centro da bola dentro da faixa Y do tijolo → bateu na lateral
+            if px == bx:
                 bola['vy'] = -bola['vy']
+                # Empurra a bola para fora para evitar colisão dupla no próximo frame
+                if by < ty + th / 2:
+                    bola['y'] = ty - BOLA_R - 1
+                else:
+                    bola['y'] = ty + th + BOLA_R + 1
+            else:
+                bola['vx'] = -bola['vx']
+                if bx < tx + tw / 2:
+                    bola['x'] = tx - BOLA_R - 1
+                else:
+                    bola['x'] = tx + tw + BOLA_R + 1
             return
 
 

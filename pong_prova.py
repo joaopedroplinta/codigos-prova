@@ -111,7 +111,7 @@ def desenhar_hud():
     desenhar_texto(LARGURA / 2 +  70, ALTURA - 23, str(paddle_dir['score']), escala=1.2)
 
     glColor3f(0.5, 0.5, 0.5)
-    desenhar_texto(10, ALTURA - 22, "W/S: mover", escala=0.7)
+    desenhar_texto(10, ALTURA - 22, "W/S ou Setas: mover", escala=0.7)
     glColor3f(0.9, 0.4, 0.4)
     desenhar_texto(LARGURA - 95, ALTURA - 22, "CPU", escala=0.7)
 
@@ -165,10 +165,10 @@ def atualizar(valor=0):
 
     area_max_y = ALTURA - HUD_H - PADDLE_H
 
-    # Movimento do jogador
-    if 'w' in teclas and paddle_esq['y'] < area_max_y:
+    # Movimento do jogador (W/S ou setas cima/baixo)
+    if ('w' in teclas or 'up' in teclas) and paddle_esq['y'] < area_max_y:
         paddle_esq['y'] = min(paddle_esq['y'] + PADDLE_VEL, area_max_y)
-    if 's' in teclas and paddle_esq['y'] > 0:
+    if ('s' in teclas or 'down' in teclas) and paddle_esq['y'] > 0:
         paddle_esq['y'] = max(paddle_esq['y'] - PADDLE_VEL, 0)
 
     # CPU: acompanha a bola com velocidade limitada
@@ -251,6 +251,20 @@ def teclado_up(tecla, x, y):
     teclas.discard(tecla)
 
 
+def teclado_especial(tecla, x, y):
+    if tecla == GLUT_KEY_UP:
+        teclas.add('up')
+    elif tecla == GLUT_KEY_DOWN:
+        teclas.add('down')
+
+
+def teclado_especial_up(tecla, x, y):
+    if tecla == GLUT_KEY_UP:
+        teclas.discard('up')
+    elif tecla == GLUT_KEY_DOWN:
+        teclas.discard('down')
+
+
 # --- Inicialização OpenGL ---
 
 def inicializar_opengl():
@@ -276,6 +290,8 @@ def main():
     glutDisplayFunc(display)
     glutKeyboardFunc(teclado)
     glutKeyboardUpFunc(teclado_up)
+    glutSpecialFunc(teclado_especial)
+    glutSpecialUpFunc(teclado_especial_up)
 
     glutMainLoop()
 

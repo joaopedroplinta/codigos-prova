@@ -361,7 +361,7 @@ def atirar():
 
 
 def atualizar(valor=0):
-    global estado, vidas
+    global estado, vidas, pontuacao
 
     if estado != 'JOGANDO':
         return

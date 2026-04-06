@@ -306,7 +306,7 @@ def atualizar(valor=0):
     nova_cab = (cab_col + dc, cab_lin + dl)
 
     # Colisão com parede
-    if not (0 <= nova_cab[0] < COLUNAS and 0 <= nova_cab[1] < LINHAS):
+    if not (0 <= nova_cab[0] < COLUNAS and 0 <= nova_cab[1] < LINHAS - HUD_LINHAS):
         estado = 'GAME_OVER'
         glutPostRedisplay()
         return

@@ -413,6 +413,7 @@ def teclado(tecla, x, y):
         if tecla == ' ':
             modo = ['1P', '2P'][opcao_menu]
             reiniciar()
+            glutPostRedisplay()
         elif tecla == 'w':
             opcao_menu = (opcao_menu - 1) % 2
             glutPostRedisplay()

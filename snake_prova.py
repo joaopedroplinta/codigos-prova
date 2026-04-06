@@ -210,25 +210,37 @@ def desenhar_hud():
 
 
 def desenhar_tela_final(titulo, cor_titulo):
-    # Painel semitransparente
+    # Centro da área de jogo (abaixo do HUD)
+    CX  = LARGURA // 2           # 400
+    CY  = (ALTURA - 28) // 2     # 386
+
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-    glColor4f(0.0, 0.0, 0.0, 0.7)
-    desenhar_retangulo(80, 160, 340, 180)
+    glColor4f(0.0, 0.0, 0.0, 0.78)
+    desenhar_retangulo(CX - 200, CY - 100, 400, 200)
     glDisable(GL_BLEND)
 
-    # Título
+    # Borda colorida
     glColor3f(*cor_titulo)
-    desenhar_texto(110, 290, titulo, escala=1.4)
+    glLineWidth(2.0)
+    desenhar_retangulo_borda(CX - 200, CY - 100, 400, 200)
+    glLineWidth(1.0)
 
-    # Pontuação final
+    # Título  ("GAME OVER" ≈ 9ch×1.4 ≈ 148px  →  x = CX - 74)
+    # ("VOCE VENCEU!" ≈ 12ch×1.4 ≈ 197px →  x = CX - 99)
+    largura_titulo = len(titulo) * 104 * 0.12 * 1.4 / 2
+    glColor3f(*cor_titulo)
+    desenhar_texto(CX - largura_titulo, CY + 48, titulo, escala=1.4)
+
+    # Pontuação  ("Pontos: XX" ≈ 10ch×1.0 ≈ 125px → x = CX - 62)
     glColor3f(1.0, 1.0, 1.0)
-    desenhar_texto(145, 250, f"Pontos: {pontuacao}", escala=1.0)
+    larg_pts = len(f"Pontos: {pontuacao}") * 104 * 0.12 * 1.0 / 2
+    desenhar_texto(CX - larg_pts, CY + 8, f"Pontos: {pontuacao}", escala=1.0)
 
-    # Instrução de reinício
-    glColor3f(0.7, 0.7, 0.7)
-    desenhar_texto(120, 210, "Pressione R para reiniciar", escala=0.75)
-    desenhar_texto(148, 185, "Pressione Q para sair", escala=0.75)
+    # Instruções
+    glColor3f(0.6, 0.6, 0.6)
+    desenhar_texto(CX - 155, CY - 35, "Pressione R para reiniciar", escala=0.75)
+    desenhar_texto(CX - 120, CY - 62, "Pressione Q para sair",      escala=0.75)
 
 
 def display():
@@ -244,17 +256,34 @@ def display():
     desenhar_hud()
 
     if estado == 'AGUARDANDO':
+        CX = LARGURA // 2
+        CY = (ALTURA - 28) // 2
+
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glColor4f(0.0, 0.0, 0.0, 0.75)
-        desenhar_retangulo(80, 195, 340, 110)
+        glColor4f(0.0, 0.0, 0.0, 0.78)
+        desenhar_retangulo(CX - 210, CY - 85, 420, 170)
         glDisable(GL_BLEND)
+
+        glColor3f(0.2, 0.5, 0.2)
+        glLineWidth(1.5)
+        desenhar_retangulo_borda(CX - 210, CY - 85, 420, 170)
+        glLineWidth(1.0)
+
+        # "Jogo da Cobrinha" ≈ 17ch×1.3 ≈ 275px → x = CX - 137
         glColor3f(0.3, 1.0, 0.3)
-        desenhar_texto(115, 275, "Jogo da Cobrinha", escala=1.3)
+        desenhar_texto(CX - 137, CY + 52, "Jogo da Cobrinha", escala=1.3)
+
+        # "Pressione uma tecla!" ≈ 20ch×1.0 ≈ 250px → x = CX - 125
         glColor3f(0.9, 0.9, 0.2)
-        desenhar_texto(105, 235, "Pressione uma tecla!", escala=1.0)
-        glColor3f(0.5, 0.5, 0.5)
-        desenhar_texto(128, 210, "WASD ou setas para mover", escala=0.7)
+        desenhar_texto(CX - 125, CY + 10, "Pressione uma tecla!", escala=1.0)
+
+        # "WASD ou setas para mover" ≈ 24ch×0.7 ≈ 209px → x = CX - 104
+        glColor3f(0.45, 0.45, 0.45)
+        desenhar_texto(CX - 104, CY - 20, "WASD ou setas para mover", escala=0.7)
+
+        glColor3f(0.35, 0.35, 0.35)
+        desenhar_texto(CX - 72, CY - 50, "R: reiniciar   Q: sair", escala=0.65)
     elif estado == 'GAME_OVER':
         desenhar_tela_final("GAME OVER", (1.0, 0.2, 0.2))
     elif estado == 'VITORIA':

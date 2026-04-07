@@ -25,10 +25,15 @@ VEL_INICIAL = 5.0
 paddle_esq = {'y': 0, 'score': 0}
 paddle_dir = {'y': 0, 'score': 0}
 bola       = {'x': 0.0, 'y': 0.0, 'vx': 0.0, 'vy': 0.0}
-estado     = 'MENU'      # 'MENU', 'AGUARDANDO', 'JOGANDO'
-modo       = None        # '1P' ou '2P'
-opcao_menu = 0           # 0 = 1 jogador, 1 = 2 jogadores
-teclas     = set()
+OPCOES_PONTOS = [3, 5, 10]
+
+estado        = 'MENU'  # 'MENU', 'ESCOLHA_PONTOS', 'AGUARDANDO', 'JOGANDO', 'FIM'
+modo          = None     # '1P', '2P' ou 'SOLO'
+opcao_menu    = 0        # 0 = 1P, 1 = 2P, 2 = Solo
+opcao_pontos  = 1        # índice em OPCOES_PONTOS (default: 5)
+limite_pontos = 5
+vencedor      = None     # 'ESQ', 'DIR' ou 'SOLO'
+teclas        = set()
 
 MARGEM_X_ESQ = 20
 MARGEM_X_DIR = LARGURA - 20 - PADDLE_W
@@ -42,13 +47,13 @@ def resetar_bola(direcao=1):
     bola['vy'] = VEL_INICIAL * random.choice([-1.0, 1.0]) * 0.6
 
 
-def inicializar_jogo(novo_modo):
-    global estado, modo
-    modo = novo_modo
+def inicializar_jogo():
+    global estado, vencedor
     paddle_esq['y']     = ALTURA // 2 - PADDLE_H // 2
     paddle_dir['y']     = ALTURA // 2 - PADDLE_H // 2
     paddle_esq['score'] = 0
     paddle_dir['score'] = 0
+    vencedor = None
     resetar_bola()
     estado = 'AGUARDANDO'
 
@@ -205,9 +210,134 @@ def desenhar_menu():
     glFlush()
 
 
+def desenhar_escolha_pontos():
+    CX = LARGURA // 2
+
+    glClear(GL_COLOR_BUFFER_BIT)
+    glColor3f(0.04, 0.04, 0.04)
+    desenhar_retangulo(0, 0, LARGURA, ALTURA)
+
+    glColor3f(1.0, 1.0, 0.3)
+    desenhar_texto(CX - 62, 450, "PONG", escala=2.5)
+
+    # Subtítulo com o modo escolhido
+    nomes = {'1P': 'vs CPU', '2P': '2 Jogadores', 'SOLO': 'Solo'}
+    sub_x = {'1P': 368, '2P': 342, 'SOLO': 379}
+    glColor3f(0.5, 0.5, 0.7)
+    desenhar_texto(sub_x[modo], 415, nomes[modo], escala=0.85)
+
+    # --- Caixa ---
+    BOX_W, BOX_H = 320, 210
+    BOX_X = CX - BOX_W // 2
+    BOX_Y = 200
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glColor4f(0.0, 0.0, 0.0, 0.75)
+    desenhar_retangulo(BOX_X, BOX_Y, BOX_W, BOX_H)
+    glDisable(GL_BLEND)
+    glColor3f(0.25, 0.25, 0.5)
+    desenhar_retangulo_borda(BOX_X, BOX_Y, BOX_W, BOX_H)
+
+    # Pergunta
+    # "Ate quantos pontos?" ≈ 19 × 10.6 ≈ 201 px  →  x = 400 - 100 = 300
+    glColor3f(0.8, 0.8, 0.8)
+    desenhar_texto(300, 385, "Ate quantos pontos?", escala=0.85)
+
+    # Opções
+    # "3 pontos" / "5 pontos" ≈ 8 × 11.2 ≈ 90 px  →  x = 400 - 45 = 355
+    # "10 pontos"             ≈ 9 × 11.2 ≈ 101 px  →  x = 400 - 50 = 350
+    LABEL_W = [90, 90, 101]
+    LABELS  = ["3 pontos", "5 pontos", "10 pontos"]
+    OPT_Y   = [350, 300, 250]
+
+    for i, label in enumerate(LABELS):
+        y  = OPT_Y[i]
+        lx = CX - LABEL_W[i] // 2
+
+        if i == opcao_pontos:
+            glColor3f(0.2, 0.2, 0.55)
+            desenhar_retangulo(BOX_X + 8, y - 8, BOX_W - 16, 34)
+            glColor3f(0.5, 0.7, 1.0)
+            glLineWidth(1.5)
+            desenhar_retangulo_borda(BOX_X + 8, y - 8, BOX_W - 16, 34)
+            glLineWidth(1.0)
+            glColor3f(1.0, 1.0, 0.3)
+            desenhar_texto(BOX_X + 14, y + 4, ">", escala=0.9)
+            glColor3f(1.0, 1.0, 1.0)
+        else:
+            glColor3f(0.55, 0.55, 0.55)
+
+        desenhar_texto(lx, y + 4, label, escala=0.9)
+
+    glColor3f(0.38, 0.38, 0.38)
+    desenhar_texto(CX - 74, 215, "ESPACO: confirmar", escala=0.72)
+    desenhar_texto(CX - 30, 202, "R: voltar",         escala=0.72)
+
+    glFlush()
+
+
+def desenhar_fim():
+    # Overlay sobre o campo congelado
+    CX = LARGURA // 2
+
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glColor4f(0.0, 0.0, 0.0, 0.80)
+    desenhar_retangulo(0, 0, LARGURA, ALTURA)
+    glDisable(GL_BLEND)
+
+    BOX_W, BOX_H = 360, 190
+    BOX_X = CX - BOX_W // 2
+    BOX_Y = 205
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glColor4f(0.05, 0.05, 0.15, 0.95)
+    desenhar_retangulo(BOX_X, BOX_Y, BOX_W, BOX_H)
+    glDisable(GL_BLEND)
+    glColor3f(0.3, 0.3, 0.6)
+    desenhar_retangulo_borda(BOX_X, BOX_Y, BOX_W, BOX_H)
+
+    # Texto do vencedor
+    # escala=1.1 → px_por_char ≈ 104*0.12*1.1 ≈ 13.7 px
+    if vencedor == 'ESQ':
+        label = "J1 VENCEU!" if modo == '2P' else "VOCE VENCEU!"
+        glColor3f(0.3, 1.0, 0.4)
+        # "J1 VENCEU!" ≈ 10×13.7=137 → x=332 | "VOCE VENCEU!" ≈ 12×13.7=164 → x=318
+        lx = 332 if modo == '2P' else 318
+    elif vencedor == 'DIR':
+        label = "J2 VENCEU!" if modo == '2P' else "CPU VENCEU!"
+        glColor3f(0.4, 0.7, 1.0) if modo == '2P' else glColor3f(1.0, 0.3, 0.3)
+        lx = 332 if modo == '2P' else 325
+    else:  # SOLO
+        label = "OBJETIVO!"
+        glColor3f(0.3, 0.9, 0.7)
+        lx = 339  # ≈ 9×13.7=123 → x=338
+
+    desenhar_texto(lx, 355, label, escala=1.1)
+
+    # Placar final
+    glColor3f(0.7, 0.7, 0.7)
+    if modo == 'SOLO':
+        # "XX rebatidas" ≈ 12×11.2=134 → x=333
+        desenhar_texto(333, 305, str(paddle_esq['score']) + " rebatidas", escala=0.9)
+    else:
+        # "X - Y" ≈ 5×11.2=56 → x=372
+        placar = str(paddle_esq['score']) + " - " + str(paddle_dir['score'])
+        desenhar_texto(CX - len(placar) * 6, 305, placar, escala=0.9)
+
+    # Instrução
+    # "ESPACO ou R: voltar ao menu" ≈ 27×8.98=242 → x=279
+    glColor3f(0.45, 0.45, 0.45)
+    desenhar_texto(279, 240, "ESPACO ou R: voltar ao menu", escala=0.72)
+
+
 def display():
     if estado == 'MENU':
         desenhar_menu()
+        return
+
+    if estado == 'ESCOLHA_PONTOS':
+        desenhar_escolha_pontos()
         return
 
     glClear(GL_COLOR_BUFFER_BIT)
@@ -270,12 +400,16 @@ def display():
         glColor3f(0.85, 0.85, 0.85)
         desenhar_texto(263, 258, "ESPACO para comecar", escala=0.75)
 
+    if estado == 'FIM':
+        desenhar_fim()
+
     glFlush()
 
 
 # --- Lógica de atualização ---
 
 def atualizar(valor=0):
+    global estado, vencedor
     if estado != 'JOGANDO':
         return
 
@@ -298,7 +432,7 @@ def atualizar(valor=0):
             paddle_dir['y'] = min(paddle_dir['y'] + PADDLE_VEL, area_max_y)
         if 'down' in teclas and paddle_dir['y'] > 0:
             paddle_dir['y'] = max(paddle_dir['y'] - PADDLE_VEL, 0)
-    else:
+    elif modo == '1P':
         # CPU
         centro_cpu = paddle_dir['y'] + PADDLE_H / 2
         cpu_vel = PADDLE_VEL * 0.78
@@ -361,6 +495,24 @@ def atualizar(valor=0):
             paddle_esq['score'] += 1
             resetar_bola(direcao=-1)
 
+    # Verificar vitória
+    if modo == 'SOLO' and paddle_esq['score'] >= limite_pontos:
+        vencedor = 'SOLO'
+        estado = 'FIM'
+        glutPostRedisplay()
+        return
+    elif modo != 'SOLO':
+        if paddle_esq['score'] >= limite_pontos:
+            vencedor = 'ESQ'
+            estado = 'FIM'
+            glutPostRedisplay()
+            return
+        if paddle_dir['score'] >= limite_pontos:
+            vencedor = 'DIR'
+            estado = 'FIM'
+            glutPostRedisplay()
+            return
+
     glutPostRedisplay()
     glutTimerFunc(VELOCIDADE_MS, atualizar, 0)
 
@@ -368,7 +520,7 @@ def atualizar(valor=0):
 # --- Teclado ---
 
 def teclado(tecla, x, y):
-    global estado, opcao_menu
+    global estado, modo, opcao_menu, opcao_pontos, limite_pontos
     if isinstance(tecla, bytes):
         tecla = tecla.decode('utf-8', errors='ignore').lower()
     teclas.add(tecla)
@@ -378,8 +530,9 @@ def teclado(tecla, x, y):
 
     if estado == 'MENU':
         if tecla == ' ':
-            escolha = ['1P', '2P', 'SOLO'][opcao_menu]
-            inicializar_jogo(escolha)
+            modo = ['1P', '2P', 'SOLO'][opcao_menu]
+            opcao_pontos = 1
+            estado = 'ESCOLHA_PONTOS'
             glutPostRedisplay()
         elif tecla == 'w':
             opcao_menu = (opcao_menu - 1) % 3
@@ -389,8 +542,30 @@ def teclado(tecla, x, y):
             glutPostRedisplay()
         return
 
+    if estado == 'ESCOLHA_PONTOS':
+        if tecla == ' ':
+            limite_pontos = OPCOES_PONTOS[opcao_pontos]
+            inicializar_jogo()
+            glutPostRedisplay()
+        elif tecla == 'w':
+            opcao_pontos = (opcao_pontos - 1) % len(OPCOES_PONTOS)
+            glutPostRedisplay()
+        elif tecla == 's':
+            opcao_pontos = (opcao_pontos + 1) % len(OPCOES_PONTOS)
+            glutPostRedisplay()
+        elif tecla == 'r':
+            estado = 'MENU'
+            glutPostRedisplay()
+        return
+
+    if estado == 'FIM':
+        if tecla in (' ', 'r'):
+            estado = 'MENU'
+            opcao_menu = 0
+            glutPostRedisplay()
+        return
+
     if tecla == 'r':
-        global modo
         estado = 'MENU'
         opcao_menu = 0
         glutPostRedisplay()
@@ -408,16 +583,22 @@ def teclado_up(tecla, x, y):
 
 
 def teclado_especial(tecla, x, y):
-    global opcao_menu
+    global opcao_menu, opcao_pontos
     if tecla == GLUT_KEY_UP:
         if estado == 'MENU':
             opcao_menu = (opcao_menu - 1) % 3
+            glutPostRedisplay()
+        elif estado == 'ESCOLHA_PONTOS':
+            opcao_pontos = (opcao_pontos - 1) % len(OPCOES_PONTOS)
             glutPostRedisplay()
         else:
             teclas.add('up')
     elif tecla == GLUT_KEY_DOWN:
         if estado == 'MENU':
             opcao_menu = (opcao_menu + 1) % 3
+            glutPostRedisplay()
+        elif estado == 'ESCOLHA_PONTOS':
+            opcao_pontos = (opcao_pontos + 1) % len(OPCOES_PONTOS)
             glutPostRedisplay()
         else:
             teclas.add('down')

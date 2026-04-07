@@ -12,6 +12,7 @@ Repositório com os códigos desenvolvidos para estudo e revisão da prova de Co
 | `asteroids_prova.py` | Asteroids | `glRotatef`, `glTranslatef`, `glPushMatrix`/`glPopMatrix`, wrap-around |
 | `velha_prova.py` | Jogo da Velha | `glutMouseFunc`, coordenadas mouse→grade, IA Minimax |
 | `labirinto_prova.py` | Labirinto | Geração por backtracking recursivo, BFS para solução, `GL_LINES` |
+| `futebol_prova.py` | Futebol (1P vs CPU ou 2P) | Colisão circular jogador×bola, IA defensiva/ofensiva, `glutSpecialFunc`, menu interativo |
 
 ## Tecnologias
 
@@ -55,3 +56,5 @@ pygl snake_prova.py
 | IA com Minimax | `velha_prova.py` |
 | Geração procedural de labirinto (backtracking recursivo) | `labirinto_prova.py` |
 | Busca em largura (BFS) | `labirinto_prova.py` |
+| IA com comportamento defensivo/ofensivo | `futebol_prova.py` |
+| Modo 1P vs CPU e 2P local | `futebol_prova.py` |

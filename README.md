@@ -7,7 +7,7 @@ Repositório com os códigos desenvolvidos para estudo e revisão da prova de Co
 | Arquivo | Descrição | Conceitos em destaque |
 |---|---|---|
 | `snake_prova.py` | Jogo Snake | Grid, GL_POLYGON, GL_LINE_LOOP, animação por timer |
-| `pong_prova.py` | Pong (jogador vs CPU) | Colisão AABB, física de bola, `glutKeyboardUpFunc` |
+| `pong_prova.py` | Pong (1P vs CPU, 2P local, Solo contra a parede) | Colisão AABB, física de bola, `glutKeyboardUpFunc`, menu com 3 modos |
 | `breakout_prova.py` | Breakout | Colisão bola×tijolo, múltiplas vidas, cores por linha |
 | `asteroids_prova.py` | Asteroids | `glRotatef`, `glTranslatef`, `glPushMatrix`/`glPopMatrix`, wrap-around |
 | `velha_prova.py` | Jogo da Velha | `glutMouseFunc`, coordenadas mouse→grade, IA Minimax |
@@ -62,7 +62,8 @@ pygl snake_prova.py
 | Geração procedural de labirinto (backtracking recursivo) | `labirinto_prova.py` |
 | Busca em largura (BFS) | `labirinto_prova.py` |
 | IA com comportamento defensivo/ofensivo | `futebol_prova.py` |
-| Modo 1P vs CPU e 2P local | `futebol_prova.py` |
+| Modo 1P vs CPU e 2P local | `futebol_prova.py`, `pong_prova.py` |
+| Modo solo (pontuação por rebatida) | `pong_prova.py` |
 | Spawn aleatório e progressão de nível | `coletor_prova.py`, `dodge_prova.py` |
 | Movimento em plataformas (troncos) | `frogger_prova.py` |
 | Timer para revelar/ocultar cartas | `memoria_prova.py` |

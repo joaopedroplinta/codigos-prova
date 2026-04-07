@@ -117,11 +117,19 @@ def desenhar_hud():
 
     # Placar
     glColor3f(0.9, 0.9, 0.9)
-    desenhar_texto(LARGURA / 2 - 110, ALTURA - 23, str(paddle_esq['score']), escala=1.2)
-    desenhar_texto(LARGURA / 2 +  70, ALTURA - 23, str(paddle_dir['score']), escala=1.2)
+    if modo == 'SOLO':
+        desenhar_texto(LARGURA / 2 - 20, ALTURA - 23, str(paddle_esq['score']), escala=1.2)
+    else:
+        desenhar_texto(LARGURA / 2 - 110, ALTURA - 23, str(paddle_esq['score']), escala=1.2)
+        desenhar_texto(LARGURA / 2 +  70, ALTURA - 23, str(paddle_dir['score']), escala=1.2)
 
     # Labels dos lados dependendo do modo
-    if modo == '1P':
+    if modo == 'SOLO':
+        glColor3f(0.5, 0.5, 0.5)
+        desenhar_texto(10, ALTURA - 22, "W/S ou Setas", escala=0.7)
+        glColor3f(0.4, 0.9, 0.7)
+        desenhar_texto(LARGURA - 100, ALTURA - 22, "Parede", escala=0.7)
+    elif modo == '1P':
         glColor3f(0.5, 0.5, 0.5)
         desenhar_texto(10, ALTURA - 22, "W/S ou Setas", escala=0.7)
         glColor3f(0.9, 0.4, 0.4)
@@ -148,10 +156,10 @@ def desenhar_menu():
     glColor3f(1.0, 1.0, 0.3)
     desenhar_texto(CX - 62, 450, "PONG", escala=2.5)
 
-    # --- Caixa do menu (320 × 190, centrada) ---
-    BOX_W, BOX_H = 320, 190
+    # --- Caixa do menu (320 × 250, centrada) ---
+    BOX_W, BOX_H = 320, 250
     BOX_X = CX - BOX_W // 2   # 240
-    BOX_Y = 240
+    BOX_Y = 180
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glColor4f(0.0, 0.0, 0.0, 0.75)
@@ -164,9 +172,10 @@ def desenhar_menu():
     # escala=0.9 → px_por_char ≈ 104*0.108 ≈ 11.2 px
     # "1 Jogador  (vs CPU)" ≈ 19 chars × 11.2 ≈ 213 px  →  x = 400 - 106 = 294
     # "2 Jogadores"         ≈ 11 chars × 11.2 ≈ 123 px  →  x = 400 - 61  = 339
-    LABEL_W  = [213, 123]
-    LABELS   = ["1 Jogador  (vs CPU)", "2 Jogadores"]
-    OPT_Y    = [388, 323]
+    # "Solo  (parede)"      ≈ 14 chars × 11.2 ≈ 157 px  →  x = 400 - 78  = 322
+    LABEL_W  = [213, 123, 157]
+    LABELS   = ["1 Jogador  (vs CPU)", "2 Jogadores", "Solo  (parede)"]
+    OPT_Y    = [388, 323, 258]
 
     for i, label in enumerate(LABELS):
         y    = OPT_Y[i]
@@ -188,13 +197,10 @@ def desenhar_menu():
         desenhar_texto(lx, y + 4, label, escala=0.9)
 
     # --- Instruções ---
-    # "W/S ou Setas: navegar" ≈ 21 × 8.7 ≈ 183 px  →  x = 400 - 91 = 309
-    # "ESPACO: confirmar"     ≈ 17 × 8.7 ≈ 148 px  →  x = 400 - 74 = 326
-    # "Q: sair"               ≈  7 × 8.7 ≈  61 px  →  x = 400 - 30 = 370
     glColor3f(0.38, 0.38, 0.38)
-    desenhar_texto(CX - 91, 274, "W/S ou Setas: navegar", escala=0.72)
-    desenhar_texto(CX - 74, 257, "ESPACO: confirmar",     escala=0.72)
-    desenhar_texto(CX - 30, 242, "Q: sair",               escala=0.72)
+    desenhar_texto(CX - 91, 214, "W/S ou Setas: navegar", escala=0.72)
+    desenhar_texto(CX - 74, 198, "ESPACO: confirmar",     escala=0.72)
+    desenhar_texto(CX - 30, 183, "Q: sair",               escala=0.72)
 
     glFlush()
 
@@ -214,12 +220,21 @@ def display():
     glColor3f(0.95, 0.95, 0.95)
     desenhar_retangulo(MARGEM_X_ESQ, paddle_esq['y'], PADDLE_W, PADDLE_H)
 
-    # Paddle direito (branco no 2P, vermelho no 1P/CPU)
-    if modo == '2P':
-        glColor3f(0.4, 0.7, 1.0)
+    # Paddle direito ou parede (SOLO)
+    if modo == 'SOLO':
+        glColor3f(0.3, 0.8, 0.6)
+        glLineWidth(4.0)
+        glBegin(GL_LINES)
+        glVertex2f(LARGURA - 4, 0)
+        glVertex2f(LARGURA - 4, ALTURA - HUD_H)
+        glEnd()
+        glLineWidth(1.0)
     else:
-        glColor3f(0.9, 0.3, 0.3)
-    desenhar_retangulo(MARGEM_X_DIR, paddle_dir['y'], PADDLE_W, PADDLE_H)
+        if modo == '2P':
+            glColor3f(0.4, 0.7, 1.0)
+        else:
+            glColor3f(0.9, 0.3, 0.3)
+        desenhar_retangulo(MARGEM_X_DIR, paddle_dir['y'], PADDLE_W, PADDLE_H)
 
     # Bola
     glColor3f(1.0, 1.0, 0.2)
@@ -241,6 +256,11 @@ def display():
             desenhar_texto(258, 320, "2 JOGADORES", escala=1.2)
             glColor3f(0.7, 0.7, 0.7)
             desenhar_texto(248, 280, "J1: W/S   J2: Setas", escala=0.78)
+        elif modo == 'SOLO':
+            glColor3f(0.3, 0.9, 0.7)
+            desenhar_texto(290, 320, "SOLO", escala=1.2)
+            glColor3f(0.7, 0.7, 0.7)
+            desenhar_texto(248, 280, "W/S ou Setas para mover", escala=0.78)
         else:
             glColor3f(1.0, 1.0, 0.3)
             desenhar_texto(255, 320, "1 JOGADOR", escala=1.2)
@@ -261,11 +281,16 @@ def atualizar(valor=0):
 
     area_max_y = ALTURA - HUD_H - PADDLE_H
 
-    # Jogador 1: W/S (sempre)
+    # Jogador 1: W/S (sempre) + setas quando não é 2P
     if 'w' in teclas and paddle_esq['y'] < area_max_y:
         paddle_esq['y'] = min(paddle_esq['y'] + PADDLE_VEL, area_max_y)
     if 's' in teclas and paddle_esq['y'] > 0:
         paddle_esq['y'] = max(paddle_esq['y'] - PADDLE_VEL, 0)
+    if modo != '2P':
+        if 'up' in teclas and paddle_esq['y'] < area_max_y:
+            paddle_esq['y'] = min(paddle_esq['y'] + PADDLE_VEL, area_max_y)
+        if 'down' in teclas and paddle_esq['y'] > 0:
+            paddle_esq['y'] = max(paddle_esq['y'] - PADDLE_VEL, 0)
 
     if modo == '2P':
         # Jogador 2: setas
@@ -302,13 +327,19 @@ def atualizar(valor=0):
         offset = (bola['y'] - (paddle_esq['y'] + PADDLE_H / 2)) / (PADDLE_H / 2)
         bola['vy'] = offset * 6.0
 
-    # Colisão paddle direito
-    if (bola['vx'] > 0
-            and MARGEM_X_DIR <= bola['x'] + BOLA_R <= MARGEM_X_DIR + PADDLE_W
-            and paddle_dir['y'] <= bola['y'] <= paddle_dir['y'] + PADDLE_H):
-        bola['vx'] = -abs(bola['vx']) * 1.04
-        offset = (bola['y'] - (paddle_dir['y'] + PADDLE_H / 2)) / (PADDLE_H / 2)
-        bola['vy'] = offset * 6.0
+    # Colisão paddle direito ou parede (SOLO)
+    if modo == 'SOLO':
+        if bola['vx'] > 0 and bola['x'] + BOLA_R >= LARGURA - 4:
+            bola['x'] = LARGURA - 4 - BOLA_R
+            bola['vx'] = -abs(bola['vx'])
+            paddle_esq['score'] += 1
+    else:
+        if (bola['vx'] > 0
+                and MARGEM_X_DIR <= bola['x'] + BOLA_R <= MARGEM_X_DIR + PADDLE_W
+                and paddle_dir['y'] <= bola['y'] <= paddle_dir['y'] + PADDLE_H):
+            bola['vx'] = -abs(bola['vx']) * 1.04
+            offset = (bola['y'] - (paddle_dir['y'] + PADDLE_H / 2)) / (PADDLE_H / 2)
+            bola['vy'] = offset * 6.0
 
     # Limitar velocidade máxima
     speed = math.hypot(bola['vx'], bola['vy'])
@@ -319,11 +350,16 @@ def atualizar(valor=0):
 
     # Ponto
     if bola['x'] < 0:
-        paddle_dir['score'] += 1
-        resetar_bola(direcao=1)
+        if modo == 'SOLO':
+            paddle_esq['score'] = 0   # errou: zera o score
+            resetar_bola(direcao=1)
+        else:
+            paddle_dir['score'] += 1
+            resetar_bola(direcao=1)
     elif bola['x'] > LARGURA:
-        paddle_esq['score'] += 1
-        resetar_bola(direcao=-1)
+        if modo != 'SOLO':
+            paddle_esq['score'] += 1
+            resetar_bola(direcao=-1)
 
     glutPostRedisplay()
     glutTimerFunc(VELOCIDADE_MS, atualizar, 0)
@@ -342,14 +378,14 @@ def teclado(tecla, x, y):
 
     if estado == 'MENU':
         if tecla == ' ':
-            escolha = ['1P', '2P'][opcao_menu]
+            escolha = ['1P', '2P', 'SOLO'][opcao_menu]
             inicializar_jogo(escolha)
             glutPostRedisplay()
         elif tecla == 'w':
-            opcao_menu = (opcao_menu - 1) % 2
+            opcao_menu = (opcao_menu - 1) % 3
             glutPostRedisplay()
         elif tecla == 's':
-            opcao_menu = (opcao_menu + 1) % 2
+            opcao_menu = (opcao_menu + 1) % 3
             glutPostRedisplay()
         return
 
@@ -375,13 +411,13 @@ def teclado_especial(tecla, x, y):
     global opcao_menu
     if tecla == GLUT_KEY_UP:
         if estado == 'MENU':
-            opcao_menu = (opcao_menu - 1) % 2
+            opcao_menu = (opcao_menu - 1) % 3
             glutPostRedisplay()
         else:
             teclas.add('up')
     elif tecla == GLUT_KEY_DOWN:
         if estado == 'MENU':
-            opcao_menu = (opcao_menu + 1) % 2
+            opcao_menu = (opcao_menu + 1) % 3
             glutPostRedisplay()
         else:
             teclas.add('down')

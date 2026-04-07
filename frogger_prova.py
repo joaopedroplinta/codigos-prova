@@ -169,6 +169,17 @@ def gerar_carro():
     carros.append([x, f['y'], larg, vel, cor, f['dir']])
 
 
+def gerar_tronco():
+    if estado != 'JOGANDO':
+        return
+    faixas_r = [f for f in FAIXAS if f['tipo'] == 'rio']
+    f    = random.choice(faixas_r)
+    x    = -80 if f['dir'] == 1 else LARGURA
+    larg = random.randint(40, 80)
+    vel  = random.uniform(1.5, 3.5) * (1 + nivel * 0.1)
+    troncos.append([x, f['y'], larg, vel, f['dir']])
+
+
 def verificar_colisao_carro():
     for c in carros:
         if abs(jogador_y - c[1]) <= 15:
@@ -197,8 +208,16 @@ def verificar_agua():
     return False
 
 
+def mover_sapo_no_tronco():
+    for f in FAIXAS:
+        if f['tipo'] == 'rio' and f['y'] - 20 <= jogador_y <= f['y'] + 20:
+            if not verificar_tronco():
+                perder_vida()
+            return
+
+
 def verificar_chegada():
-    global pontuacao, nivel
+    global pontuacao, nivel, jogador_x, jogador_y
     for c in chegadas:
         if (abs(jogador_x - c['x']) < TAM_JOGADOR // 2 and
                 abs(jogador_y - c['y']) < TAM_JOGADOR // 2 and
@@ -209,7 +228,6 @@ def verificar_chegada():
                 nivel += 1
                 reiniciar_nivel()
             else:
-                global jogador_x, jogador_y
                 jogador_x = LARGURA // 2
                 jogador_y = 50
             return True
@@ -451,8 +469,11 @@ def atualizar(valor=0):
     if estado == 'JOGANDO':
         mover_carros()
         mover_troncos()
+        mover_sapo_no_tronco()
         if random.random() < 0.02:
             gerar_carro()
+        if random.random() < 0.015:
+            gerar_tronco()
     glutPostRedisplay()
     glutTimerFunc(VELOCIDADE_MS, atualizar, 0)
 

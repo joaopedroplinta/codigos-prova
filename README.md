@@ -11,6 +11,7 @@ Repositório com os códigos desenvolvidos para estudo e revisão da prova de Co
 | `breakout_prova.py` | Breakout | Colisão bola×tijolo, múltiplas vidas, cores por linha |
 | `asteroids_prova.py` | Asteroids | `glRotatef`, `glTranslatef`, `glPushMatrix`/`glPopMatrix`, wrap-around |
 | `velha_prova.py` | Jogo da Velha | `glutMouseFunc`, coordenadas mouse→grade, IA Minimax |
+| `labirinto_prova.py` | Labirinto | Geração por backtracking recursivo, BFS para solução, `GL_LINES` |
 
 ## Tecnologias
 
@@ -27,8 +28,13 @@ source venv/bin/activate
 # Instale as dependências
 pip install PyOpenGL PyOpenGL_accelerate
 
+#Configurando para rodar no meu note (BigLinux)
+alias pygl='env WAYLAND_DISPLAY="" PYOPENGL_PLATFORM=x11 python'
+
 # Execute um dos scripts
 python snake_prova.py
+
+pygl snake_prova.py
 ```
 
 ## Tópicos de Estudo
@@ -47,3 +53,5 @@ python snake_prova.py
 | Teclado contínuo (`glutKeyboardUpFunc`, `glutSpecialUpFunc`) | `pong_prova.py`, `breakout_prova.py`, `asteroids_prova.py` |
 | Entrada de mouse (`glutMouseFunc`, conversão pixel→jogo) | `velha_prova.py` |
 | IA com Minimax | `velha_prova.py` |
+| Geração procedural de labirinto (backtracking recursivo) | `labirinto_prova.py` |
+| Busca em largura (BFS) | `labirinto_prova.py` |

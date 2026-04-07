@@ -40,7 +40,7 @@ segunda_carta    = None
 aguardando       = False
 movimentos       = 0
 pares_encontrados = 0
-estado           = 'MENU'   # 'MENU', 'JOGANDO', 'VITORIA'
+estado           = 'MENU'   # 'MENU', 'MEMORIZANDO', 'JOGANDO', 'VITORIA'
 tempo_inicio     = 0.0
 tempo_atual      = 0.0
 
@@ -53,16 +53,25 @@ def inicializar_jogo():
     global pares_encontrados, estado, tempo_inicio, tempo_atual
     cores_cartas      = list(CORES_CARTAS_BASE)
     random.shuffle(cores_cartas)
-    cartas_viradas    = [False] * (LINHAS * COLUNAS)
+    cartas_viradas    = [True] * (LINHAS * COLUNAS)   # todas reveladas para memorizar
     cartas_combinadas = [False] * (LINHAS * COLUNAS)
     primeira_carta    = None
     segunda_carta     = None
     aguardando        = False
     movimentos        = 0
     pares_encontrados = 0
-    tempo_inicio      = time.time()
+    tempo_inicio      = 0.0
     tempo_atual       = 0.0
-    estado            = 'JOGANDO'
+    estado            = 'MEMORIZANDO'
+    glutTimerFunc(2000, fim_memorizacao, 0)
+
+
+def fim_memorizacao(valor):
+    global cartas_viradas, estado, tempo_inicio
+    cartas_viradas = [False] * (LINHAS * COLUNAS)
+    tempo_inicio   = time.time()
+    estado         = 'JOGANDO'
+    glutPostRedisplay()
 
 
 # --- Helpers de desenho ---
@@ -297,6 +306,20 @@ def desenhar_vitoria():
 
 # --- Loop principal ---
 
+def desenhar_overlay_memorizando():
+    CX = LARGURA // 2
+    CY = AREA_H  // 2
+
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glColor4f(0.0, 0.0, 0.0, 0.55)
+    retangulo(CX - 200, CY + 30, 400, 50)
+    glDisable(GL_BLEND)
+
+    glColor3f(1.0, 0.9, 0.3)
+    desenhar_texto(CX - 155, CY + 44, 'Memorize as cartas!', escala=0.85)
+
+
 def display():
     if estado == 'MENU':
         desenhar_menu()
@@ -310,7 +333,9 @@ def display():
     desenhar_tabuleiro()
     desenhar_hud()
 
-    if estado == 'VITORIA':
+    if estado == 'MEMORIZANDO':
+        desenhar_overlay_memorizando()
+    elif estado == 'VITORIA':
         desenhar_vitoria()
 
     glFlush()
@@ -341,8 +366,11 @@ def tecla_normal(tecla, x, y):
 
 def mouse_clique(button, state, mx, my):
     if button == GLUT_LEFT_BUTTON and state == GLUT_DOWN:
-        my    = ALTURA - my
-        indice = obter_indice_carta(mx, my)
+        w      = glutGet(GLUT_WINDOW_WIDTH)
+        h      = glutGet(GLUT_WINDOW_HEIGHT)
+        mx_gl  = int(mx * LARGURA / w)
+        my_gl  = int((h - my) * ALTURA / h)
+        indice = obter_indice_carta(mx_gl, my_gl)
         if indice != -1:
             processar_clique(indice)
 
